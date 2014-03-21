@@ -1,3 +1,5 @@
+from operator import mul
+
 array_str = '''
         08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08
         49 49 99 40 17 81 18 57 60 87 17 40 98 43 69 48 04 56 62 00
@@ -20,26 +22,39 @@ array_str = '''
         20 73 35 29 78 31 90 01 74 31 49 71 48 86 81 16 23 57 05 54
         01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48
 '''
-#import pdb; pdb.set_trace()
-array = [[]]
-outer = 0
-for i, n in enumerate(array_str.split()):
-    try:
-        array[outer].append(int(n))
-    except IndexError:
-        array.append([])
-        array[outer].append(int(n))
-    if not (i + 1) % 20:
-        outer += 1
 
-def products_of_4(a):
-    ''' a must be square '''
+def prep_array(astr):
+    array = [[]]
+    outer = 0
+    for i, n in enumerate(astr.split()):
+        try:
+            array[outer].append(int(n))
+        except IndexError:
+            array.append([])
+            array[outer].append(int(n))
+        if not (i + 1) % 20:
+            outer += 1
+    return array
+
+def products_of_4(ar):
+    ''' Generator of all products of 4 adjacent numbers in an array
+        Here, adjacency is left-right, up-down, and both diagonals. 
+
+        Accepts: an m x n rectangular array of int
+    '''
     step = 4
-    w = len(a[0])
-    h = len(a)
-    row = 0
-    col = 0
-    for i in xrange(w - step):
-       pass 
-        
+    w = len(ar[0])
+    h = len(ar)
 
+    for col in xrange(w):
+        for row in xrange(h - step + 1):
+            if col <= 16:
+                # Horizontal
+                yield reduce(mul, ar[row][col:col+step])
+                # Vertical
+                yield reduce(mul, [x[col] for x in ar[row:row+step]])
+                # Diagonal-Upper Right to lower left (\)
+                yield reduce(mul, [ar[row+i][col+i] for i in xrange(step)])
+            if col >= 3:
+                # Diagonal-Lower Right to upper left (/)
+                yield reduce(mul, [ar[row+i][col-i] for i in xrange(step)])
